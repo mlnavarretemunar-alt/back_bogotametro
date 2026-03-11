@@ -1,2 +1,5 @@
-C:\back_bogotametro\bogotametro\src\main\java\co\bogotametro\web\util\ConexionDb.java
-C:\back_bogotametro\bogotametro\src\main\java\co\bogotametro\web\servlet\InicioServlet.java
+C:\back_bogotametro\bogotametro\src\main\java\co\bogotametro\modeloDao\PasajeroDAO.java
+C:\back_bogotametro\bogotametro\src\main\java\co\bogotametro\util\Crud.java
+C:\back_bogotametro\bogotametro\src\main\java\co\bogotametro\controlador\PasajeroControlador.java
+C:\back_bogotametro\bogotametro\src\main\java\co\bogotametro\modeloVo\PasajeroVO.java
+C:\back_bogotametro\bogotametro\src\main\java\co\bogotametro\util\ConexionDb.java

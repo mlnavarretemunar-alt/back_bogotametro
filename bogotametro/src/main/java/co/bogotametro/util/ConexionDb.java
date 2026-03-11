@@ -1,4 +1,4 @@
-package co.bogotametro.web.util;
+package co.bogotametro.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,7 +34,16 @@ public class ConexionDb {
     }
 
     public Connection closeConexion() {
-        conexion.close();
+
+        try{
+            if(conexion != null) {
+                conexion.close();
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         conexion=null;
         return conexion;
         }

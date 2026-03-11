@@ -1,11 +1,15 @@
-package co.bogotametro.web.modeloDao;
+package co.bogotametro.modeloDao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import moduloVo.PasajeroVO;
-import util.ConexionDb;
+
+import co.bogotametro.util.ConexionDb;
 import util.Crud;
+import java.util.Date;
+
+import co.bogotametro.modeloVo.PasajeroVO;
+
 
 public class PasajeroDAO extends ConexionDb implements Crud {
     //1. Declarar variables u objetos
@@ -22,7 +26,7 @@ public class PasajeroDAO extends ConexionDb implements Crud {
     private boolean pas_status_pasajero=false;
 
     //2. Recibir los datos del VO
-    public PasajeroDAO (PasajeroDAO pasDao) {
+    public PasajeroDAO (PasajeroVO pasVO) {
         super();
 
         try {
@@ -30,15 +34,15 @@ public class PasajeroDAO extends ConexionDb implements Crud {
     conexion = this.getConexion();
 
     //4. Traer los datos del VO al DAO
-    pas_nom_pasajero=pasVO.getpas_nom_pasajero();
-    pas_contrasena_encriptada=pasVO.getpas_contrasena_encriptada();
-    pas_telefono=pasVO.getpas_telefono();
-    pas_correo=pasVO.getpas_correo();
-    pas_tipo_documento=pasVO.getpas_tipo_documento();
-    pas_nro_documento=pasVO.getpas_nro_documento();
-    pas_id_pasajero=pasVO.getpas_id_pasajero();
-    pas_fecha_registro=pasVO.getpas_fecha_registro();
-    pas_status_pasajero=pasVO.getpas_status_pasajero();
+    pas_nom_pasajero=pasVO.getNom_pasajero();
+    pas_contrasena_encriptada=pasVO.getContrasena_encriptada();
+    pas_telefono=pasVO.getTelefono();
+    pas_correo=pasVO.getCorreo();
+    pas_tipo_documento=pasVO.getTipo_documento();
+    pas_nro_documento=pasVO.getNro_documento();
+    pas_id_pasajero=pasVO.getId_pasajero();
+    pas_fecha_registro=pasVO.getFecha_registro();
+    pas_status_pasajero=pasVO.isStatus_pasajero();
 
         } catch (Exception e) {
             System.out.println("Error" + e.toString());
@@ -47,7 +51,7 @@ public class PasajeroDAO extends ConexionDb implements Crud {
 
     public boolean agregarRegistro() {
         try {
-            sql="insert into pasajero(pas_nom_pasajero, pas_contrasena, pas_telefono, pas_correo, pas_nro_documento, pas_fecha_registro,pas_status_pasajero) values (?,?,?,?,?,?,?)";
+            sql="insert into pasajero(pas_nom_pasajero, pas_contrasena, pas_telefono, pas_correo, pas_tipo_documento, pas_nro_documento, pas_fecha_registro,pas_status_pasajero) values (?,?,?,?,?,?,?,?)";
             puente= conexion.prepareStatement(sql);
             puente.setString(1, pas_nom_pasajero);
             puente.setString(2, pas_contrasena_encriptada);
@@ -55,7 +59,7 @@ public class PasajeroDAO extends ConexionDb implements Crud {
             puente.setString(4, pas_correo);
             puente.setString(5, pas_tipo_documento);
             puente.setString(6, pas_nro_documento);
-            puente.setDate(7, pas_fecha_registro);
+            puente.setDate(7, new java.sql.Date(pas_fecha_registro.getTime()));
             puente.setBoolean(8, pas_status_pasajero);
             puente.executeUpdate();
             operacion=true;
@@ -82,7 +86,7 @@ public class PasajeroDAO extends ConexionDb implements Crud {
             puente.setString(4, pas_correo);
             puente.setString(5, pas_nro_documento);
             puente.setString(6, pas_tipo_documento);
-            puente.setDate(7, pas_fecha_registro);
+            puente.setDate(7, new java.sql.Date(pas_fecha_registro.getTime()));
             puente.setBoolean(8, pas_status_pasajero);
             puente.setInt(9, pas_id_pasajero);
             puente.executeUpdate();
@@ -156,7 +160,7 @@ public class PasajeroDAO extends ConexionDb implements Crud {
             conexion= this.getConexion();
             sql="select*from pasajero where pas_tipo_documento=? and pas_nro_documento=? and pas_contrasena_encriptada=?";
             puente=conexion.prepareStatement(sql);
-            puente.setString(1, pas_tipo_documento.name());
+            puente.setString(1, pas_tipo_documento);
             puente.setString(2, pas_nro_documento);
             puente.setString(3, pas_contrasena_encriptada);
             mensajero= puente.executeQuery();
@@ -169,7 +173,7 @@ public class PasajeroDAO extends ConexionDb implements Crud {
             System.out.println("Error" + e.toString());
         } finally {
             try {
-                this.closeconnexion();
+                this.closeConexion();
             } catch (Exception e) {
                 System.out.println("Error" + e.toString());
             }
@@ -179,11 +183,13 @@ public class PasajeroDAO extends ConexionDb implements Crud {
 
     public boolean validarEstadoPasajero() {
         try {
-            sql="select 1 from pasajero where pas_id_pasajero=? and pas_status_pasajero=true";
+            sql="select 1 from pasajero where pas_id_pasajero=? and pas_status_pasajero=?";
             puente= conexion.prepareStatement(sql);
+
             puente.setInt(1, pas_id_pasajero);
-            puente.setInt(2, pas_status_pasajero);
-            puente.executeQuery();
+            puente.setBoolean(2, pas_status_pasajero);
+
+            mensajero= puente.executeQuery();
 
             if (mensajero.next()) {      //ÉSTA LÍNEA BUSCA EN LA DB Y SI ENCUENTRA UN REGISTRO DEVUELVE TRUE
                 operacion=true;

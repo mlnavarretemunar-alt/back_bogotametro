@@ -1,5 +1,5 @@
 <html>
   <body>
-    <h2>Hello fucking all</h2>
+    <h2>Hello all</h2>
   </body>
 </html>

@@ -1,2 +1,5 @@
-co\bogotametro\web\servlet\InicioServlet.class
-co\bogotametro\web\util\ConexionDb.class
+co\bogotametro\modeloDao\PasajeroDAO.class
+co\bogotametro\controlador\PasajeroControlador.class
+co\bogotametro\modeloVo\PasajeroVO.class
+co\bogotametro\util\ConexionDb.class
+util\Crud.class
