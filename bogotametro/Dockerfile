@@ -1,15 +1,8 @@
-FROM maven:3.9.6-eclipse-temurin-17 AS build
-
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY . .
-
 RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:17-jdk
-
-WORKDIR /app
-COPY --from=build /app/target/bogotametro.war app.war
-
-EXPOSE 10000
-
-CMD ["java","-jar","app.war"]
+FROM tomcat:10.1-jdk17-temurin
+COPY --from=build /app/target/bogotametro.war /usr/local/tomcat/webapps/ROOT.war
+EXPOSE 8080
