@@ -14,10 +14,10 @@ public class ConexionDb {
     public ConexionDb () {
         driver="com.mysql.cj.jdbc.Driver";
         user="root";
-        password="";
-        nameDb="dbbogotametroapp";
+        password="1234567890";
+        nameDb="newDbMetroApp";
         port="3306";
-        urlDb="jdbc:mysql://localhost:3306/dbbogotametroapp";
+        urlDb="jdbc:mysql://localhost:3306/newDbMetroApp";
     }
 // 3.Ahora si a conectar
     public Connection getConexion () {

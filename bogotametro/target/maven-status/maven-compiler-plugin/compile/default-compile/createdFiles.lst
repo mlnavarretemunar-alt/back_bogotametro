@@ -2,4 +2,4 @@ co\bogotametro\modeloDao\PasajeroDAO.class
 co\bogotametro\controlador\PasajeroControlador.class
 co\bogotametro\modeloVo\PasajeroVO.class
 co\bogotametro\util\ConexionDb.class
-util\Crud.class
+co\bogotametro\util\Crud.class

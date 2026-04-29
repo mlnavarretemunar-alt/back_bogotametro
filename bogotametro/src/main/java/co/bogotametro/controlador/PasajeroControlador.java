@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.Date;
@@ -18,9 +19,17 @@ public class PasajeroControlador extends HttpServlet {
      // Mostrar la página de login
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    throws ServletException, IOException {
 
+    String accion = request.getParameter("accion");
+    
+    if("cerrarSesion".equals(accion)) {
+        HttpSession sesion = request.getSession();
+        sesion.invalidate();
         request.getRequestDispatcher("/index.jsp").forward(request, response);
+}   else {
+    request.getRequestDispatcher("/index.jsp").forward(request, response);
+}
     }
 
     // Procesar el formulario
@@ -36,6 +45,10 @@ public class PasajeroControlador extends HttpServlet {
         String pas_correo=request.getParameter("textpas_correo");
         String pas_tipo_documento= request.getParameter("textpas_tipo_documento");
         String pas_nro_documento= request.getParameter("textpas_nro_documento");
+        String pas_contrasena_Nueva= request.getParameter("textpas_contrasena_Nueva");
+        String pas_contrasena_Actual= request.getParameter("textpas_contrasena_Actual");
+        String pas_contrasena_Confirmacion= request.getParameter("textpas_contrasena_confirmacion");
+
 
         int pas_id_pasajero= Integer.parseInt(request.getParameter("pas_id_pasajero"));
         Date pas_fecha_registro= new Date();
@@ -102,11 +115,28 @@ PasajeroVO pasVO = new PasajeroVO(
             
             case 5: //Iniciar sesión:
                 if(pasDao.iniciarSesion(pas_tipo_documento, pas_nro_documento, pas_contrasena_encriptada)) {
+                    HttpSession sesion = request.getSession();
+                    sesion.setAttribute("pasajeroActivo", pas_id_pasajero);
                     request.getRequestDispatcher("menu.jsp").forward(request, response);
                 }else{
                     request.setAttribute("mensajeError", "El pasajero y/o la contraseña son incorrectos");
                     request.getRequestDispatcher("index.jsp").forward(request, response);
                 }
+                break;
+            
+            case 6: //Cambiar contraseña:
+                if(pas_contrasena_Nueva.equals (pas_contrasena_Confirmacion )) {
+                    if(pasDao.cambiarContrasena(pas_contrasena_Actual, pas_contrasena_Nueva)) {
+                        request.setAttribute("mensajeExito", "La contraseña se actualizó correctamente");
+                        
+                    }else{
+                        request.setAttribute("mensajeError", "La contraseña no se actualizó correctamente");
+                    }
+                    request.getRequestDispatcher("cambiarContrasena.jsp").forward(request, response);
+                }else{
+                        request.setAttribute("mensajeError", "La contraseña nueva y la confirmación no coinciden");
+                        request.getRequestDispatcher("cambiarContrasena.jsp").forward(request, response);
+                    }
                 break;
         }
     }

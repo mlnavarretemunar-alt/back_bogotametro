@@ -5,8 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import co.bogotametro.util.ConexionDb;
-import util.Crud;
+import co.bogotametro.util.Crud;
 import java.util.Date;
+import java.util.UUID;
 
 import co.bogotametro.modeloVo.PasajeroVO;
 
@@ -51,7 +52,7 @@ public class PasajeroDAO extends ConexionDb implements Crud {
 
     public boolean agregarRegistro() {
         try {
-            sql="insert into pasajero(pas_nom_pasajero, pas_contrasena, pas_telefono, pas_correo, pas_tipo_documento, pas_nro_documento, pas_fecha_registro,pas_status_pasajero) values (?,?,?,?,?,?,?,?)";
+            sql="insert into pasajero(pas_nom_pasajero, pas_contrasena_encriptada, pas_telefono, pas_correo, pas_tipo_documento, pas_nro_documento, pas_fecha_registro,pas_status_pasajero) values (?,?,?,?,?,?,?,?)";
             puente= conexion.prepareStatement(sql);
             puente.setString(1, pas_nom_pasajero);
             puente.setString(2, pas_contrasena_encriptada);
@@ -78,7 +79,7 @@ public class PasajeroDAO extends ConexionDb implements Crud {
 
     public boolean actualizarRegistro() {
         try {
-            sql="update pasajero set pas_nom_pasajero=?, pas_contrasena=?, pas_telefono=?, pas_correo=?, pas_nro_documento=?, pas_fecha_registro=?, pas_status_pasajero=? where pas_id_pasajero=?";
+            sql="update pasajero set pas_nom_pasajero=?, pas_contrasena_encriptada=?, pas_telefono=?, pas_correo=?, pas_nro_documento=?, pas_fecha_registro=?, pas_status_pasajero=? where pas_id_pasajero=?";
             puente= conexion.prepareStatement(sql);
             puente.setString(1, pas_nom_pasajero);
             puente.setString(2, pas_contrasena_encriptada);
@@ -156,31 +157,45 @@ public class PasajeroDAO extends ConexionDb implements Crud {
     }
 
     public boolean iniciarSesion(String pas_tipo_documento, String pas_nro_documento, String pas_contrasena_encriptada) {
-        try {
-            conexion= this.getConexion();
-            sql="select*from pasajero where pas_tipo_documento=? and pas_nro_documento=? and pas_contrasena_encriptada=?";
-            puente=conexion.prepareStatement(sql);
-            puente.setString(1, pas_tipo_documento);
-            puente.setString(2, pas_nro_documento);
-            puente.setString(3, pas_contrasena_encriptada);
-            mensajero= puente.executeQuery();
 
-            if (mensajero.next()) {
+    try {
+        conexion = this.getConexion();
+
+        sql = "SELECT pas_contrasena_encriptada FROM pasajero WHERE pas_tipo_documento=? AND pas_nro_documento=?";
+
+        puente = conexion.prepareStatement(sql);
+        puente.setString(1, pas_tipo_documento);
+        puente.setString(2, pas_nro_documento);
+
+        mensajero = puente.executeQuery();
+
+        if (mensajero.next()) {
+
+            String contrasenaBD = mensajero.getString("pas_contrasena_encriptada");
+
+            if (contrasenaBD.equals(pas_contrasena_encriptada)) {
                 operacion = true;
+            } else {
+                operacion = false;
             }
 
-        }  catch (Exception e) {
-            System.out.println("Error" + e.toString());
-        } finally {
-            try {
-                this.closeConexion();
-            } catch (Exception e) {
-                System.out.println("Error" + e.toString());
-            }
+        } else {
+            operacion = false;
         }
-        return operacion;
+
+    } catch (Exception e) {
+        System.out.println("Error" + e.toString());
+    } finally {
+        try {
+            this.closeConexion();
+        } catch (Exception e) {
+            System.out.println("Error" + e.toString());
+        }
     }
 
+    return operacion;
+}
+    
     public boolean validarEstadoPasajero() {
         try {
             sql="select 1 from pasajero where pas_id_pasajero=? and pas_status_pasajero=?";
@@ -205,5 +220,78 @@ public class PasajeroDAO extends ConexionDb implements Crud {
             }
         }
         return operacion;
+    }
+
+    public boolean cambiarContrasena(String pas_contrasena_Actual, String pas_contrasena_Nueva) {
+        try{
+        sql="select pas_contrasena_encriptada from pasajero where pas_id_pasajero=?";
+
+        puente = conexion.prepareStatement(sql);
+        puente.setInt(1, pas_id_pasajero);
+        mensajero= puente.executeQuery();
+
+        if (mensajero.next()) {
+            String contrasenaBD = mensajero.getString("pas_contrasena_encriptada");
+            if (contrasenaBD.equals(pas_contrasena_Actual)) {
+
+        sql="update pasajero set pas_contrasena_encriptada=? where pas_id_pasajero=?";
+
+        puente= conexion.prepareStatement(sql);
+        puente.setString(1, pas_contrasena_Nueva);
+        puente.setInt(2, pas_id_pasajero);
+        puente.executeUpdate();
+        operacion= true;
+            }else {
+                operacion=false;
+            }
+        }
+        }catch (Exception e) {
+            System.out.println("Error" + e.toString());
+        }
+        finally {
+            try{
+                this.closeConexion();
+            }catch (Exception e) {
+                System.out.println("Error" + e.toString());
+            }
+            }
+        return operacion;
+
+    }
+
+    public boolean recuperarContrasena(String pas_correo) {
+        try {
+            sql="select pas_correo from pasajero where pas_correo=?";
+            
+            puente= conexion.prepareStatement(sql);
+            puente.setString(1, pas_correo);
+
+            mensajero =puente.executeQuery();
+
+            if (mensajero.next()) {
+                String tokenUnico = UUID.randomUUID().toString();
+
+                Date ahora = new Date();
+                Long expiracion = ahora.getTime() + (24*60*60*1000);
+                Date fechaExpiracion = new Date (expiracion);
+                
+                sql="update pasajero set pas_token_recuperacion=?, pas_token_expiracion=? where pas_correo=?";
+                puente=conexion.prepareStatement(sql);
+                puente.setString(1, tokenUnico);
+                puente.setDate(2, new java.sql.Date(fechaExpiracion.getTime()));
+                puente.setString(3, pas_correo);
+                puente.executeUpdate();
+
+                operacion= true;
+                    
+                } catch (Exception e) {
+                    System.out.println("Error" + e.toString());
+                
+
+                    // TODO: handle exception
+                }
+                
+            }
+        }
     }
 }
