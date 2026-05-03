@@ -1,5 +1,7 @@
+co\bogotametro\util\Crud.class
 co\bogotametro\modeloDao\PasajeroDAO.class
 co\bogotametro\controlador\PasajeroControlador.class
 co\bogotametro\modeloVo\PasajeroVO.class
 co\bogotametro\util\ConexionDb.class
-co\bogotametro\util\Crud.class
+co\bogotametro\util\CorreoApp$1.class
+co\bogotametro\util\CorreoApp.class
